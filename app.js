@@ -1,5 +1,7 @@
+console.log('!! APP INIT !!');
+
 var now = new Date();
-console.log('Time of init: ' + now);
+console.log('Time of init: ' + now.toISOString());
 
 import express from 'express';
 import db from './testDb/db';
