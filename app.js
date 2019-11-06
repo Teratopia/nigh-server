@@ -1,3 +1,6 @@
+var now = new Date();
+console.log('Time of init: ' + now);
+
 import express from 'express';
 import db from './testDb/db';
 import bodyParser from 'body-parser';
@@ -285,10 +288,17 @@ router.post('/fetchMatchById', (req, res) => {
   MatchRouter.fetchMatchById(req, res);
 });
 
-
-
+//Nigh.us-east-2.elasticbeanstalk.com
+/*
 const PORT = 5000;
 
 server.listen(PORT, () => {
   console.log(`server running on port ${PORT}`)
+});
+*/
+
+var port = process.env.PORT || 5000;
+
+server.listen(port, function () {
+    console.log('Server running at http://127.0.0.1:' + port + '/');
 });
