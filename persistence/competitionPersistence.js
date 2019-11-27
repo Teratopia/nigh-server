@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const Competition = require('../models/Competition');
+const Competition = require('../models/competition');
 const User = require('../models/user');
 
 const requestCompetition = (competition, onSuccess, onFailure) => {
