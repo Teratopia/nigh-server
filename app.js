@@ -10,7 +10,9 @@ import testPersist from './persistence/testPersist';
 import userPersistance from './persistence/userPersistence';
 import UserRouter from './router/userRouter';
 import MatchRouter from './router/matchRouter';
+import VenueRouter from './router/venueRouter';
 import MatchPersistence from './persistence/matchPersistence';
+import CompetitionRouter from './router/competitionRouter';
 
 const mongoose = require('mongoose');
 const Product = require('./models/product');
@@ -288,6 +290,171 @@ router.post('/findAllMatchesByUserId', (req, res) => {
 
 router.post('/fetchMatchById', (req, res) => {
   MatchRouter.fetchMatchById(req, res);
+});
+
+router.post('/searchUserByUsername', (req, res) => {
+  console.log('searchUserByUsername 1');
+  UserRouter.searchUserByUsername(req, res);
+});
+
+router.post('/sendFriendRequest', (req, res) => {
+  console.log('sendFriendRequest 1');
+  UserRouter.sendFriendRequest(req, res);
+});
+
+router.post('/getAllFriendRequestsForUser', (req, res) => {
+  console.log('getAllFriendRequestsForUser 1');
+  UserRouter.getAllFriendRequestsForUser(req, res);
+});
+
+router.post('/acceptFriendRequest', (req, res) => {
+  console.log('acceptFriendRequest 1');
+  UserRouter.acceptFriendRequest(req, res);
+});
+
+router.post('/getUserFriends', (req, res) => {
+  console.log('getUserFriends 1');
+  UserRouter.getUserFriends(req, res);
+});
+
+router.post('/requestCompetition', (req, res) => {
+  console.log('requestCompetition 1');
+  CompetitionRouter.requestCompetition(req, res);
+});
+
+router.post('/checkForCompetition', (req, res) => {
+  console.log('checkForCompetition 1');
+  CompetitionRouter.checkForCompetition(req, res);
+});
+
+router.delete('/deleteChallenge', (req, res) => {
+  console.log('deleteChallenge 1');
+  CompetitionRouter.deleteChallenge(req, res);
+});
+
+router.post('/acceptChallenge', (req, res) => {
+  console.log('acceptChallenge 1');
+  CompetitionRouter.acceptChallenge(req, res);
+});
+
+router.post('/updateChallenge', (req, res) => {
+  console.log('acceptChallenge 1');
+  CompetitionRouter.updateChallenge(req, res);
+});
+
+router.post('/confirmChallenge', (req, res) => {
+  console.log('confirmChallenge 1');
+  CompetitionRouter.confirmChallenge(req, res);
+});
+
+router.post('/toggleBlockFriend', (req, res) => {
+  console.log('toggleBlockFriend 1');
+  UserRouter.toggleBlockFriend(req, res);
+});
+
+router.post('/signUpVenue', (req, res) => {
+  console.log('signUpVenue 1');
+  VenueRouter.signUpVenue(req, res);
+});
+
+router.post('/loginVenue', (req, res) => {
+  console.log('loginVenue 1');
+  VenueRouter.loginVenue(req, res);
+});
+
+router.post('/updateVenue', (req, res) => {
+  console.log('updateVenue 1');
+  VenueRouter.updateVenue(req, res);
+});
+
+router.post('/queryVenues', (req, res) => {
+  console.log('queryVenues 1');
+  VenueRouter.queryVenues(req, res);
+});
+
+router.delete('/clearVenues', (req, res) => {
+  console.log('clearVenues 1');
+  VenueRouter.clearVenues(req, res);
+});
+
+router.post('/addTableToVenue', (req, res) => {
+  console.log('addTableToVenue 1');
+  VenueRouter.addTableToVenue(req, res);
+});
+
+router.post('/updateTable', (req, res) => {
+  console.log('updateTable 1');
+  VenueRouter.updateTable(req, res);
+});
+
+router.delete('/deletePoolTable', (req, res) => {
+  console.log('deletePoolTable 1');
+  VenueRouter.deletePoolTable(req, res);
+});
+
+router.post('/getVenueById', (req, res) => {
+  console.log('getVenueById 1');
+  VenueRouter.getVenueById(req, res);
+});
+
+router.post('/getPlayersCheckedIntoVenue', (req, res) => {
+  console.log('getPlayersCheckedIntoVenue 1');
+  VenueRouter.getPlayersCheckedIntoVenue(req, res);
+});
+
+router.post('/updateUserStatusToActive', (req, res) => {
+  console.log('updateUserStatusToActive 1');
+  UserRouter.updateUserStatusToActive(req, res);
+});
+
+router.post('/getCompetitionHistory', (req, res) => {
+  console.log('getCompetitionHistory 1');
+  CompetitionRouter.getCompetitionHistory(req, res);
+});
+
+router.post('/getVenueCompetitionHistory', (req, res) => {
+  console.log('getVenueCompetitionHistory 1');
+  CompetitionRouter.getVenueCompetitionHistory(req, res);
+});
+
+router.post('/getMultipleUsersById', (req, res) => {
+  console.log('getMultipleUsersById 1');
+  UserRouter.getMultipleUsersById(req, res);
+});
+
+router.post('/upsertVenuePromotion', upload.array('photo', 3), (req, res) => {
+  console.log('upsertVenuePromotion req, ', req);
+  //console.log('upsertVenuePromotion res, ', res);
+  //console.log('upsertVenuePromotion req.res, ', req.res);
+  //console.log('upsertVenuePromotion req.files, ', req.files);
+  console.log('upsertVenuePromotion req.body.venueId, ', req.body.venueId);
+  console.log('upsertVenuePromotion req.body, ', req.body);
+  if(req.files && req.files[0] && req.files[0].path){
+    VenueRouter.upsertVenuePromotion(req.files[0].path, req.body.venueId, req.body._id, req.body.name, req.body.fromDate, req.body.toDate, req.body.isActive, req, res);
+  } else {
+    VenueRouter.upsertVenuePromotion(null, req.body.venueId, req.body._id, req.body.name, req.body.fromDate, req.body.toDate, req.body.isActive, req, res);
+
+  }
+});
+
+router.delete('/clearVenuePromotions', (req, res) => {
+  console.log('clearVenuePromotions 1');
+  VenueRouter.clearVenuePromotions(req, res);
+});
+
+router.delete('/clearVenuePromotions/:venueId', (req, res) => {
+  console.log('clearVenuePromotions 1');
+  VenueRouter.clearVenuePromotions(req, res);
+});
+
+router.post('/getVenuePromotionImage', (req, res) => {
+  console.log('getVenuePromotionImage 1');
+  VenueRouter.getVenuePromotionImage(req, res);
+});
+
+router.post('/deletePromotion', (req, res) => {
+  console.log('deletePromotion 1');
+  VenueRouter.deletePromotion(req, res);
 });
 
 //Nigh.us-east-2.elasticbeanstalk.com

@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const User = require('../models/user');
 const Image = require('../models/image');
+const FriendRequest = require('../models/friendRequest');
 var fs = require('fs');
 const Bcrypt = require("bcryptjs");
 
@@ -22,6 +23,7 @@ const createNewUser = (username, password, latitude, longitude, deviceId, onSucc
                 },
                 picture: null,
                 isActive: true,
+                activeVenueId : null,
                 deviceIds: [deviceId],
                 statuses: initializeStatuses()
             });
@@ -64,9 +66,29 @@ const loginUser = (username, password, latitude, longitude, deviceId, onSuccess,
     })
 }
 
-async function updateUserStatuses(userId, statuses, onSuccess, onFailure) {
+async function updateUserStatusToActive(userId, statuses, venueId, onSuccess, onFailure) {
     const user = await User.findById(userId);
+    const update = {activeVenueId : venueId, statuses : statuses};
+    await user.updateOne(update);
+    const updatedUser = await User.findById(userId);
+    console.log('updateUserStatusToActive updatedUser = ');
+    console.log(updatedUser);
+    onSuccess(updatedUser);
+}
+
+async function updateUserStatuses(userId, statuses, onSuccess, onFailure) {
+    //TODO HANDLE OTHER ACTIVITIES
     const update = { statuses: statuses };
+    var flag = false;
+    statuses.forEach(status => {
+        if(status.active){
+            flag = true;
+        }
+    })
+    if(flag){
+        update.activeVenueId = null;
+    }
+    const user = await User.findById(userId);
     await user.updateOne(update);
     const updatedUser = await User.findById(userId);
 
@@ -84,7 +106,7 @@ async function setAllUserStatusesToPassive(userId, onSuccess, onFailure) {
     });
     console.log('USER 2:');
     console.log(user);
-    const update = { statuses: user.statuses };
+    const update = { activeVenueId : null, statuses: user.statuses };
     await user.updateOne(update);
     const updatedUser = await User.findById(userId);
 
@@ -117,7 +139,7 @@ function initializeStatuses() {
             active: false,
             passive: false,
             lastModified: Date.now(),
-            description: ''
+            description: '' 
         });
     });
     return retActs;
@@ -125,6 +147,14 @@ function initializeStatuses() {
 
 const getAllUsers = (userId, onSuccess, onFailure) => {
     User.find().then(docs => {
+        onSuccess(docs);
+    }).catch(err => {
+        onFailure(err);
+    })
+}
+
+const getMultipleUsersById = (userIds, onSuccess, onFailure) => {
+    User.find({_id : { $in : userIds}}).then(docs => {
         onSuccess(docs);
     }).catch(err => {
         onFailure(err);
@@ -284,6 +314,118 @@ const updateUserProfileInformation = (reqBody, onSuccess, onFailure) => {
     });
 }
 
+const searchUserByUsername = (username, onSuccess, onFailure) => {
+    User.find({username: new RegExp('^'+username, "i")}).then(docs => {
+        onSuccess(docs);
+    }).catch(err => {
+        onFailure(err);
+    });
+}
+
+const sendFriendRequest = (requesterId, requesteeId, message, onSuccess, onFailure) => {
+    User.findById(requesterId).then(erUser => {
+        if(erUser){
+            User.findById(requesteeId).then(eeUser => {
+                if(eeUser){
+                    const friendRequest = new FriendRequest({
+                        _id: mongoose.Types.ObjectId(),
+                        createDate: Date.now(),
+                        responseDate: null,
+                        requester : erUser,
+                        requestee : eeUser,
+                        accepted : false,
+                        message : message
+                    });
+                    friendRequest.save().then(doc => {
+                        onSuccess(doc);
+                    }).catch(err => {
+                        onFailure(err);
+                    })
+                }
+            }).catch(err => {
+                onFailure(err);
+            })
+        }
+    }).catch(err => {
+        onFailure(err);
+    })
+}
+
+const getAllFriendRequestsForUser = (userId, onSuccess, onFailure) => {
+    //FriendRequest.deleteMany({});
+    FriendRequest.find({ $or : [
+            {"requester._id" : userId, accepted : false},
+            {"requestee._id" : userId, accepted : false}
+        ]
+    }).then(requests => {
+        onSuccess(requests);
+    }).catch(err => {
+        onFailure(err);
+    });
+}
+
+const acceptFriendRequest = (userId, requesterId, onSuccess, onFailure) => {
+    FriendRequest.findOne({"requester._id" : requesterId, "requestee._id" : userId}).then(request => {
+        request.accepted = true;
+        request.save().then(doc => {
+            User.findById(userId).then(requestee => {
+                requestee.friendsIdList.push(requesterId);
+                requestee.save().then(updatedRequestee => {
+                    User.findById(requesterId).then(requester => {
+                        requester.friendsIdList.push(userId);
+                        requester.save().then(updateRequester => {
+                            onSuccess(updatedRequestee, updateRequester);
+                        }).catch(err => {
+                            onFailure(err);
+                        });
+                    }).catch(err => {
+                        onFailure(err);
+                    });
+                }).catch(err => {
+                    onFailure(err);
+                });
+            }).catch(err => {
+                onFailure(err);
+            });
+        }).catch(err => {
+            onFailure(err);
+        });
+    }).catch(err => {
+        onFailure(err);
+    });
+}
+
+const getUserFriends = (userId, onSuccess, onFailure) => {
+    User.findById(userId).then(user => {
+        User.find({_id : { $in : user.friendsIdList}}).then(users => {
+            onSuccess(users);
+        }).catch(err => {
+            onFailure(err);
+        })
+    })
+}
+
+const toggleBlockFriend = (userId, friendToBlockId, onSuccess, onFailure) => {
+    User.findById(userId).then(user => {
+        var removing = false;
+        user.blockedFriendsIdList.forEach((id, index) => {
+            if(id === friendToBlockId){
+                removing = true;
+            }
+        });
+        if(removing){
+            user.blockedFriendsIdList.pull(friendToBlockId);
+        } else {
+            user.blockedFriendsIdList.push(friendToBlockId);
+        }
+        user.save().then(resUser => {
+            onSuccess(resUser);
+        }).catch(err => {
+            onFailure(err);
+        })
+    })
+}
+
 //get rid of this...
 const deleteAllUsers = () => {
     User.deleteMany({}, res => {
@@ -319,4 +461,25 @@ const activities = [
     { key: '23', title: 'WORK', description: '', status: 'off', explanation: 'Need some work done? Want to make some cash? Tell folks what you need done or reply to a posted job offer!' }
 ];
 
-export default { createNewUser, fetchUserInfoByDeviceId, loginUser, updateUserStatuses, setAllUserStatusesToPassive, updateUserLocation, getAllUsers, getAllUsersByActivity, getAllUsersByActivityAndRange, updateUserProfilePic, deleteAllUsers, getUserProfileImage, updateUserProfileInformation };
+export default {    createNewUser, 
+                    fetchUserInfoByDeviceId, 
+                    loginUser, 
+                    updateUserStatuses, 
+                    setAllUserStatusesToPassive, 
+                    updateUserLocation, 
+                    getAllUsers, 
+                    getAllUsersByActivity, 
+                    getAllUsersByActivityAndRange, 
+                    updateUserProfilePic, 
+                    deleteAllUsers, 
+                    getUserProfileImage, 
+                    updateUserProfileInformation, 
+                    searchUserByUsername,
+                    sendFriendRequest,
+                    getAllFriendRequestsForUser,
+                    acceptFriendRequest,
+                    getUserFriends,
+                    updateUserStatusToActive,
+                    toggleBlockFriend,
+                    getMultipleUsersById
+                };

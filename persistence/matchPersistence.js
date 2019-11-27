@@ -51,12 +51,15 @@ const createMatch = (userId, matchUserId, event, onSuccess, onFailure) => {
                 matchDate : new Date(),
                 userOne : userOne,
                 userTwo : userTwo,
-                messages : [{
+                messages : []
+            });
+            if(event){
+                match.messages = [{
                     userId : matchUserId,
                     createDate : new Date(),
                     text : event.description
-                }]
-            });
+                }];
+            }
             match.save().then(doc => {
                 onSuccess(doc);
             }).catch(err => {

@@ -6,7 +6,20 @@ var Status = mongoose.Schema({
     active : Boolean,
     passive : Boolean,
     lastModified : Date,
-    description : String
+    description : String,
+
+    friendsAreNear : Boolean,
+    friendsBecomeActive : Boolean,
+    aPoolTableIsNear : Boolean,
+    anActiveUserIsNear : Boolean,
+    shareMyStatusWithFriends : Boolean,
+    shareMyLocationWithFriends : Boolean,
+    showFriendsMyLocationOnMap : Boolean,
+    notifyFriendsIfNear : Boolean,
+    notifyAnyUserIfNear : Boolean,
+
+    league : Boolean,
+    casual : Boolean
    });
 
 const userSchema = mongoose.Schema({
@@ -22,6 +35,7 @@ const userSchema = mongoose.Schema({
     },
     picture : String,
     isActive : Boolean,
+    activeVenueId : String,
     deviceIds : [String],
     gender : String,
     sexuality : String,
@@ -31,6 +45,8 @@ const userSchema = mongoose.Schema({
     birthdate : Date,
     email : String,
     profileDescription : String,
+    friendsIdList : [String],
+    blockedFriendsIdList : [String],
     statuses : [Status]
 });
 

@@ -67,6 +67,26 @@ const updateUserLocation = (req, res) => {
     });
 }
 
+const updateUserStatusToActive = (req, res) => {
+    console.log('updateUserStatusToActive successful, req.body = ');
+    var bodyJson = req.body;
+    console.log(bodyJson);
+    userPersistance.updateUserStatusToActive(bodyJson.userId, bodyJson.statuses, bodyJson.venueId, doc => {
+        console.log('# doc = ', doc);
+        res.status(200).send({
+        success : true,
+        bodyReceived : req.body,
+        user : doc
+        })
+    }, err => {
+        console.log('# err = ', err);
+        res.status(500).send({
+        success : false,
+        message : err
+        })
+    });
+}
+
 const updateUserStatuses = (req, res) => {
     console.log('updateUserStatuses successful, req.body = ');
     var bodyJson = req.body;
@@ -148,6 +168,27 @@ const getAllUsers = (req, res) => {
     //username, password, latitude, longitude, onSuccess, onFailure
     userPersistance.getAllUsers(bodyJson.userId, docs => {
         console.log('# getAllUsers docs = ', docs);
+        res.status(200).send({
+        success : 'true',
+        bodyReceived : req.body,
+        users : docs
+        })
+    }, err => {
+        console.log('# err = ', err);
+        res.status(500).send({
+        success : false,
+        message : err
+        })
+    });
+}
+
+const getMultipleUsersById = (req, res) => {
+    console.log('getMultipleUsersById successful, req.body = ');
+    var bodyJson = req.body;
+    console.log(bodyJson);
+    //username, password, latitude, longitude, onSuccess, onFailure
+    userPersistance.getMultipleUsersById(bodyJson.userIds, docs => {
+        console.log('# getMultipleUsersById docs = ', docs);
         res.status(200).send({
         success : 'true',
         bodyReceived : req.body,
@@ -260,12 +301,143 @@ const updateUserProfileInformation = (req, res) => {
     });
 }
 
+const searchUserByUsername = (req, res) => {
+    console.log('searchUserByUsername 1');
+    var bodyJson = req.body;
+    console.log(bodyJson);
+    userPersistance.searchUserByUsername(bodyJson.username, docs => {
+        console.log('# searchUserByUsername docs = ', docs);
+        res.status(200).send({
+        success : true,
+        users : docs
+        })
+    }, err => {
+        console.log('# err = ', err);
+        res.status(500).send({
+        success : false,
+        message : err
+        })
+    });
+}
 
+const sendFriendRequest = (req, res) => {
+    console.log('sendFriendRequest 1');
+    var bodyJson = req.body;
+    console.log(bodyJson);
+    userPersistance.sendFriendRequest(bodyJson.requesterId, bodyJson.requesteeId, bodyJson.message, request => {
+        console.log('# sendFriendRequest request = ', request);
+        res.status(200).send({
+        success : true,
+        request : request
+        })
+    }, err => {
+        console.log('# err = ', err);
+        res.status(500).send({
+        success : false,
+        message : err
+        })
+    });
+}
 
+const getAllFriendRequestsForUser = (req, res) => {
+    console.log('getAllFriendRequestsForUser 1');
+    var bodyJson = req.body;
+    console.log(bodyJson);
+    userPersistance.getAllFriendRequestsForUser(bodyJson.userId, requests => {
+        console.log('# getAllFriendRequestsForUser requests = ', requests);
+        res.status(200).send({
+        success : true,
+        requests : requests
+        })
+    }, err => {
+        console.log('# err = ', err);
+        res.status(500).send({
+        success : false,
+        message : err
+        })
+    });
+}
 
+const acceptFriendRequest = (req, res) => {
+    console.log('acceptFriendRequest 1');
+    var bodyJson = req.body;
+    console.log(bodyJson);
+    userPersistance.acceptFriendRequest(bodyJson.userId, bodyJson.requesterId, (requestee, requester) => {
+        console.log('# acceptFriendRequest user = ', user);
+        res.status(200).send({
+        success : true,
+        updatedRequestee : requestee,
+        updatedRequester : requester
+        })}, err => {
+        console.log('# err = ', err);
+        res.status(500).send({
+        success : false,
+        message : err
+        })
+    });
+}
+
+const getUserFriends = (req, res) => {
+    console.log('getUserFriends 1');
+    var bodyJson = req.body;
+    console.log(bodyJson);
+    userPersistance.getUserFriends(bodyJson.userId, friends => {
+        console.log('# getUserFriends friends = ', friends);
+        res.status(200).send({
+        success : true,
+        friends : friends
+        })
+    }, err => {
+        console.log('# err = ', err);
+        res.status(500).send({
+        success : false,
+        message : err
+        })
+    });
+}
+
+const toggleBlockFriend = (req, res) => {
+    console.log('toggleBlockFriend 1');
+    var bodyJson = req.body;
+    console.log(bodyJson);
+    userPersistance.toggleBlockFriend(bodyJson.userId, bodyJson.friendToBlockId, user => {
+        console.log('# toggleBlockFriend friendToBlockId = ', bodyJson.friendToBlockId);
+        res.status(200).send({
+        success : true,
+        user : user
+        })
+    }, err => {
+        console.log('# err = ', err);
+        res.status(500).send({
+        success : false,
+        message : err
+        })
+    });
+}
 
 const deleteAllUsers = () => {
     userPersistance.deleteAllUsers();
 }
 
-export default { loginUser, signUpUser, updateUserLocation, updateUserStatuses, setAllUserStatusesToPassive, fetchUserInfoByDeviceId, getAllUsers, getAllUsersByActivity, getAllUsersByActivityAndRange, deleteAllUsers, updateUserProfilePic, getUserProfileImage, updateUserProfileInformation };
+export default {    loginUser, 
+                    signUpUser, 
+                    updateUserLocation, 
+                    updateUserStatuses, 
+                    setAllUserStatusesToPassive, 
+                    fetchUserInfoByDeviceId, 
+                    getAllUsers, 
+                    getAllUsersByActivity, 
+                    getAllUsersByActivityAndRange, 
+                    deleteAllUsers, 
+                    updateUserProfilePic, 
+                    getUserProfileImage, 
+                    updateUserProfileInformation, 
+                    searchUserByUsername,
+                    sendFriendRequest,
+                    getAllFriendRequestsForUser,
+                    acceptFriendRequest,
+                    getUserFriends,
+                    toggleBlockFriend,
+                    updateUserStatusToActive,
+                    getMultipleUsersById
+                };
