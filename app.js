@@ -256,6 +256,7 @@ var multer = require('multer');
 
 const Storage = multer.diskStorage({
   destination(req, file, callback) {
+    console.log('** storage');
     callback(null, './images')
   },
   filename(req, file, callback) {
@@ -450,6 +451,11 @@ router.delete('/clearVenuePromotions/:venueId', (req, res) => {
 router.post('/getVenuePromotionImage', (req, res) => {
   console.log('getVenuePromotionImage 1');
   VenueRouter.getVenuePromotionImage(req, res);
+});
+
+router.post('/getVenueNotificationInfoById', (req, res) => {
+  console.log('getVenueNotificationInfoById 1');
+  VenueRouter.getVenueNotificationInfoById(req, res);
 });
 
 router.post('/deletePromotion', (req, res) => {

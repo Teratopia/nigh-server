@@ -106,6 +106,28 @@ const getVenueById = (req, res) => {
     });
 }
 
+const getVenueNotificationInfoById = (req, res) => {
+    console.log('getVenueNotificationInfoById 1 successful, req.body = ');
+    var bodyJson = req.body;
+    console.log(bodyJson);
+    venuePersistence.getVenueNotificationInfoById(bodyJson.venueId, bodyJson.statusSettings, bodyJson.friendsList, retVal => {
+        //console.log('# venue = ', venue);
+        res.status(200).send({
+        success : 'true',
+        bodyReceived : req.body,
+        venue : retVal.venue,
+        friendsAtVenue : retVal.friendsAtVenue,
+        nonFriendsAtVenue : retVal.nonFriendsAtVenue
+        })
+    }, err => {
+        console.log('# err = ', err);
+        res.status(500).send({
+        success : false,
+        message : err
+        })
+    });
+}
+
 const getPlayersCheckedIntoVenue = (req, res) => {
     console.log('getPlayersCheckedIntoVenue 1 successful, req.body = ');
     var bodyJson = req.body;
@@ -289,5 +311,6 @@ export default {
                 upsertVenuePromotion,
                 clearVenuePromotions,
                 getVenuePromotionImage,
+                getVenueNotificationInfoById,
                 deletePromotion
                 };

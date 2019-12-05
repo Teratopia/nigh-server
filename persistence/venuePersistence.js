@@ -110,6 +110,54 @@ const getVenueById = (venueId, onSuccess, onFailure) => {
     });
 }
 
+const getVenueNotificationInfoById = (venueId, statusSettings, friendsList, onSuccess, onFailure) => {
+    var friendsAtVenue = [];
+    var nonFriendsAtVenue = [];
+    Venue.findById(venueId).then(venue => {
+        console.log('getVenueNotificationInfoById venue = ', venue);
+        if(statusSettings.friendsAreNear || statusSettings.anActiveUserIsNear){
+            getPlayersCheckedIntoVenue(venueId, statusSettings.activityName, resUsers => {
+                resUsers.forEach(user => {
+                    var userSettings;
+                    user.statuses.forEach(status => {
+                        if(status.activityName === statusSettings.activityName){
+                            userSettings = status;
+                        }
+                    });
+                    if(userSettings){
+                        if( statusSettings.friendsAreNear && 
+                            userSettings.notifyFriendsIfNear && 
+                            friendsList.includes(user._id)){
+                                friendsAtVenue.push(user);
+                        } else if( statusSettings.anActiveUserIsNear &&
+                                    userSettings.notifyAnyUserIfNear){
+                                        nonFriendsAtVenue.push(user);
+                        }
+                    }
+                });
+                console.log('getVenueNotificationInfoById 2 venue = ', venue);
+                console.log('getVenueNotificationInfoById 2 friendsAtVenue = ', friendsAtVenue);
+                console.log('getVenueNotificationInfoById 2 nonFriendsAtVenue = ', nonFriendsAtVenue);
+                onSuccess({
+                            venue : venue, 
+                            friendsAtVenue : friendsAtVenue, 
+                            nonFriendsAtVenue : nonFriendsAtVenue
+                        });
+            }, err => {
+                console.log('getPlayersCheckedIntoVenue err = ', err);
+            });
+        } else {
+            onSuccess({
+                venue : venue, 
+                friendsAtVenue : friendsAtVenue, 
+                nonFriendsAtVenue : nonFriendsAtVenue
+            });
+        }
+    }).catch(err => {
+        onFailure(err);
+    });
+}
+
 const getPlayersCheckedIntoVenue = (venueId, activityName, onSuccess, onFailure) => {
     User.find({isActive : true, activeVenueId : venueId}).then(allUsers => {
         if(!activityName){
@@ -411,5 +459,6 @@ export default {    signUpVenue,
                     upsertVenuePromotion,
                     clearVenuePromotions,
                     getVenuePromotionImage,
+                    getVenueNotificationInfoById,
                     deletePromotion
                 };
