@@ -119,19 +119,21 @@ const getVenueNotificationInfoById = (venueId, statusSettings, friendsList, onSu
             getPlayersCheckedIntoVenue(venueId, statusSettings.activityName, resUsers => {
                 resUsers.forEach(user => {
                     var userSettings;
-                    user.statuses.forEach(status => {
-                        if(status.activityName === statusSettings.activityName){
-                            userSettings = status;
-                        }
-                    });
-                    if(userSettings){
-                        if( statusSettings.friendsAreNear && 
-                            userSettings.notifyFriendsIfNear && 
-                            friendsList.includes(user._id)){
-                                friendsAtVenue.push(user);
-                        } else if( statusSettings.anActiveUserIsNear &&
-                                    userSettings.notifyAnyUserIfNear){
-                                        nonFriendsAtVenue.push(user);
+                    if(user.statuses ){
+                        user.statuses.forEach(status => {
+                            if(status.activityName === statusSettings.activityName){
+                                userSettings = status;
+                            }
+                        });
+                        if(userSettings){
+                            if( statusSettings.friendsAreNear && 
+                                userSettings.notifyFriendsIfNear && 
+                                friendsList.includes(user._id)){
+                                    friendsAtVenue.push(user);
+                            } else if( statusSettings.anActiveUserIsNear &&
+                                        userSettings.notifyAnyUserIfNear){
+                                            nonFriendsAtVenue.push(user);
+                            }
                         }
                     }
                 });

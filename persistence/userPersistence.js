@@ -36,9 +36,6 @@ const createNewUser = (username, password, latitude, longitude, deviceId, onSucc
     }).catch(err => {
         onFailure(err);
     })
-
-
-    
 }
 
 const fetchUserInfoByDeviceId = (deviceId, onSuccess, onFailure) => {
@@ -95,6 +92,17 @@ async function updateUserStatuses(userId, statuses, onSuccess, onFailure) {
     console.log('updatedUser = ');
     console.log(updatedUser);
     onSuccess(updatedUser);
+}
+
+async function logoutUser(userId, onSuccess, onFailure) {
+    setAllUserStatusesToPassive(userId, updatedUser => {
+            updatedUser.updateOne({isActive : false}).then(doc => {
+                onSuccess(doc);
+            }).catch(err => {
+                console.log('logout user error = ', err);
+                onFailure(err);
+            })
+        });
 }
 
 async function setAllUserStatusesToPassive(userId, onSuccess, onFailure) {
@@ -481,5 +489,6 @@ export default {    createNewUser,
                     getUserFriends,
                     updateUserStatusToActive,
                     toggleBlockFriend,
-                    getMultipleUsersById
+                    getMultipleUsersById,
+                    logoutUser
                 };

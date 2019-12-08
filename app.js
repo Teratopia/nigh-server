@@ -37,27 +37,20 @@ router.get('/', function(req, res){
 
 io.on('connection', function(socket){
   var room = 'default';
+  var userId = 'default';
   console.log('a user connected');
+  socket.on('userLogin', function(userId) {
+    console.log('userLogin userId, '+userId);
+    userId = userId;
+  });
   socket.on('room', function(matchRoom) {
     console.log('room recieved, '+matchRoom);
     socket.join(matchRoom);
     room = matchRoom;
-    /*
-    MatchPersistence.findMatchById(matchRoom, match => {
-      console.log('connection find Match by id match = ');
-      console.log(match);
-
-      //socket.to(room).emit('chat message', reformatInitialMessages(match));
-    }, err => {
-      console.log(err);
-    });
-    */
-    //io.to(room).emit('chat message', 'joined chat');
   });
   socket.on('chat message', function(msg){
     console.log('message: ' + JSON.stringify(msg)+', room = '+room);
 
-    //io.emit('chat message', msg);
     MatchPersistence.addMessageToMatch(room, msg, res => {
       console.log('persist message successful, res = ');
       console.log(res);
@@ -66,86 +59,34 @@ io.on('connection', function(socket){
       console.log(err);
     });
     socket.broadcast.to(room).emit('chat message', msg);
-    /*
-, function(answer){
-      console.log('answered', answer);
+  });
+  socket.on('leaveRoom', function(room) {
+    console.log('room left, '+room);
+    socket.leave(room);
+  });
+  socket.on('userLogout', function(userId) {
+    console.log('userLogout userId, '+userId);
+    if(userId !== 'default'){
+        userPersistance.setAllUserStatusesToPassive(userId, doc => {
+        console.log('socket user doc = ', doc);
+    }, err => {
+        console.log('# err = ', err);
+      });
     }
-    */
+    userId = 'default';
   });
   socket.on('disconnect', function(){
-    console.log('user disconnected');
-  });
-});
-
-function reformatInitialMessages(match){
-  /*
-  {createdAt : Date,
-  text : String,
-  user : {
-    _id : String
-  }}
-
-  var Message = mongoose.Schema({
-     userId: String,
-     createDate: Date,
-     text : String
+    console.log('on disconnect userId = ', userId);
+    if(userId !== 'default'){
+      userPersistance.setAllUserStatusesToPassive(userId, doc => {
+      console.log('socket user doc = ', doc);
+    }, err => {
+      console.log('# err = ', err);
     });
-
-const matchSchema = mongoose.Schema({
-    _id : mongoose.Schema.Types.ObjectId,
-    matchDate : Date,
-    userOne : User.schema,
-    userTwo : User.schema,
-    messages : [Message]
-});
-*/
-  
-  var retVal = [];
-  match.messages.forEach(function(message){
-    var reformMess = {
-      _id : message._id,
-      text : message.text,
-      createdAt : message.createDate,
-      user : {
-        _id : message.userId,
-      }
-    };
-    if(message.userId === match.userOne._id){
-      reformMess.user.name = match.userOne.username;
-    } else {
-      reformMess.user.name = match.userTwo.username;
     }
-    retVal.push(reformMess);
-  });
-  return retVal;
-}
-
-
-/*
-const nsp = io.of('/matchChat');
-nsp.on('connection', function(socket){
-  //populate chat messages
-  console.log('someone connected');
-
-  socket.on('room', function(room) {
-    //socket.join(room);
-    console.log('room recieved, '+room);
-});
-
-  //replace someRoom with match ID
-  //socket.join('some room');
-  
-  socket.on('chat message', function(msg){
-    console.log('message: ' + msg);
-    nsp.emit('chat message', msg);
-    //nsp.to('some room').emit('chat message', msg);
-  });
-
-  socket.on('disconnect', function(){
     console.log('user disconnected');
   });
 });
-*/
 
 
 //API
