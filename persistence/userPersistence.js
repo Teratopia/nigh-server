@@ -5,7 +5,7 @@ const FriendRequest = require('../models/friendRequest');
 var fs = require('fs');
 const Bcrypt = require("bcryptjs");
 
-const createNewUser = (username, password, latitude, longitude, deviceId, onSuccess, onFailure) => {
+const createNewUser = (username, password, latitude, longitude, deviceId, pnToken, onSuccess, onFailure) => {
     User.find({ username: username }).then(docs => {
         if(docs.length > 0){
             onFailure('Username Exists');
@@ -25,6 +25,7 @@ const createNewUser = (username, password, latitude, longitude, deviceId, onSucc
                 isActive: true,
                 activeVenueId : null,
                 deviceIds: [deviceId],
+                pnToken : pnToken,
                 statuses: initializeStatuses()
             });
             user.save().then(doc => {
@@ -46,7 +47,7 @@ const fetchUserInfoByDeviceId = (deviceId, onSuccess, onFailure) => {
     })
 }
 
-const loginUser = (username, password, latitude, longitude, deviceId, onSuccess, onFailure) => {
+async function loginUser(username, password, latitude, longitude, deviceId, pnToken, onSuccess, onFailure){
     console.log('log in user 3');
 
     User.findOne({
@@ -54,13 +55,19 @@ const loginUser = (username, password, latitude, longitude, deviceId, onSuccess,
     }).then(doc => {
         if(Bcrypt.compareSync(password, doc.password)) {
             console.log('log in user success doc = ', doc);
-            onSuccess(doc);
+            if(doc.pnToken !== pnToken){
+                doc.updateOne({pnToken : pnToken}).then(updatedUser => {
+                    onSuccess(updatedUser);
+                });                
+            } else {
+                onSuccess(doc);
+            }
         } else {
             onFailure('Invalid password');
         }
     }).catch(err => {
         onFailure(err);
-    })
+    });
 }
 
 async function updateUserStatusToActive(userId, statuses, venueId, onSuccess, onFailure) {

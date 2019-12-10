@@ -9,7 +9,7 @@ const loginUser = (req, res) => {
     var bodyJson = req.body;
     console.log(bodyJson);
     //username, password, latitude, longitude, onSuccess, onFailure
-    userPersistance.loginUser(bodyJson.username, bodyJson.password, bodyJson.latitude, bodyJson.longitude, bodyJson.deviceId, doc => {
+    userPersistance.loginUser(bodyJson.username, bodyJson.password, bodyJson.latitude, bodyJson.longitude, bodyJson.deviceId, bodyJson.pnToken, doc => {
         console.log('# doc = ', doc);
         res.status(200).send({
         success : 'true',
@@ -30,7 +30,7 @@ const signUpUser = (req, res) => {
     var bodyJson = req.body;
     console.log(bodyJson);
     //username, password, latitude, longitude, onSuccess, onFailure
-    userPersistance.createNewUser(bodyJson.username, bodyJson.password, bodyJson.latitude, bodyJson.longitude, bodyJson.deviceId, doc => {
+    userPersistance.createNewUser(bodyJson.username, bodyJson.password, bodyJson.latitude, bodyJson.longitude, bodyJson.deviceId, bodyJson.pnToken, doc => {
         console.log('# doc = ', doc);
         res.status(200).send({
         success : 'true',

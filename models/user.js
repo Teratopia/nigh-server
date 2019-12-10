@@ -37,6 +37,7 @@ const userSchema = mongoose.Schema({
     isActive : Boolean,
     activeVenueId : String,
     deviceIds : [String],
+    pnToken : String,
     gender : String,
     sexuality : String,
     occupation : String,

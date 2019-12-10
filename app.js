@@ -14,6 +14,10 @@ import VenueRouter from './router/venueRouter';
 import MatchPersistence from './persistence/matchPersistence';
 import CompetitionRouter from './router/competitionRouter';
 
+import notificationHandler from './notifications/notificationHandler';
+
+notificationHandler;
+
 const mongoose = require('mongoose');
 const Product = require('./models/product');
 

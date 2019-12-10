@@ -19,6 +19,7 @@ const matchSchema = mongoose.Schema({
 const mongoose = require('mongoose');
 const Match = require('../models/match');
 const User = require('../models/user');
+const notificationHandler = require('../notifications/notificationHandler');
 
 const createOrFetchMatch = (userId, matchUserId, event, onSuccess, onFailure) => {
     Match.findOne({$or : [
@@ -102,6 +103,11 @@ const addMessageToMatch = (matchId, message, onSuccess, onFailure) => {
                     text : message.text
                 }}
             }).then(result => {
+                //sendNotification(pnToken, text, payload = {}, expSecs = 30)
+                var recipient = result.userOne === message.user._id ? result.userTwo : result.userOne;
+                if(recipient.pnToken){
+                    notificationHandler.sendNotification(recipient.pnToken, 'New message from '+message.username+'!', {}, 120);
+                }
                 onSuccess(result);
             }).catch(err => {
                 onFailure(err);
