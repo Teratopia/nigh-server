@@ -19,7 +19,7 @@ const matchSchema = mongoose.Schema({
 const mongoose = require('mongoose');
 const Match = require('../models/match');
 const User = require('../models/user');
-const notificationHandler = require('../notifications/notificationHandler');
+import notificationHandler from '../notifications/notificationHandler';
 
 const createOrFetchMatch = (userId, matchUserId, event, onSuccess, onFailure) => {
     Match.findOne({$or : [
@@ -88,7 +88,41 @@ const findMatchById = (matchId, onSuccess, onFailure) => {
     });
 }
 
-const addMessageToMatch = (matchId, message, onSuccess, onFailure) => {
+async function addMessageToMatch(matchId, message, onSuccess, onFailure){
+    console.log('addMessageToMatch 1, matchID = '+matchId+', message = ');
+    console.log(message);
+
+    var match = await Match.findById(matchId);
+    if(match){
+        console.log('match found, ', match);
+        await match.updateOne({
+            $push : {messages : {
+                userId: message.user._id,
+                createDate: message.createdAt,
+                text : message.text
+            }}});
+        var updatedMatch = await Match.findById(matchId);
+        if(updatedMatch.userOne._id === message.user._id){
+                try{
+                    var recipient = await User.findById(updatedMatch.userTwo._id);
+                    await notificationHandler.sendNotification(recipient.pnToken, 'New message from '+updatedMatch.userOne.username+'!', {}, 120);
+                } catch (e){
+                    console.log('send notification error = ', e);
+                }
+        } else {
+                try{
+                    var recipient = await User.findById(updatedMatch.userOne._id);
+                    await notificationHandler.sendNotification(recipient.pnToken, 'New message from '+updatedMatch.userTwo.username+'!', {}, 120);
+                } catch (e){
+                    console.log('send notification error = ', e);
+                }
+        }
+        onSuccess(updatedMatch);
+    } else {
+        onFailure('Could not find match');
+    }
+
+/*
     console.log('addMessageToMatch 1, matchID = '+matchId+', message = ');
     console.log(message);
     Match.findById(matchId)
@@ -102,13 +136,15 @@ const addMessageToMatch = (matchId, message, onSuccess, onFailure) => {
                     createDate: message.createdAt,
                     text : message.text
                 }}
-            }).then(result => {
+            }).then(res => {
                 //sendNotification(pnToken, text, payload = {}, expSecs = 30)
-                var recipient = result.userOne === message.user._id ? result.userTwo : result.userOne;
-                if(recipient.pnToken){
-                    notificationHandler.sendNotification(recipient.pnToken, 'New message from '+message.username+'!', {}, 120);
+                console.log('%% addMessageToMatch res 2 = ', res);
+                if(res.userOne._id === message.user._id){
+                    notificationHandler.sendNotification(res.userTwo.pnToken, 'New message from '+message.username+'!', {}, 120);
+                } else {
+                    notificationHandler.sendNotification(res.userOne.pnToken, 'New message from '+message.username+'!', {}, 120);
                 }
-                onSuccess(result);
+                onSuccess(res);
             }).catch(err => {
                 onFailure(err);
             });
@@ -118,6 +154,7 @@ const addMessageToMatch = (matchId, message, onSuccess, onFailure) => {
     }).catch(err => {
         onFailure(err);
     });
+    */
 }
 
 export default { createOrFetchMatch, findAllMatchesByUserId, addMessageToMatch, findMatchById }

@@ -45,7 +45,7 @@ apnProvider.send(testNote, deviceToken).then( (result) => {
 async function sendNotification(pnToken, text, payload = {}, expSecs = 30){
     
     var note = new apn.Notification();
-    note.expiry = Math.floor(Date.now() / 1000) + expSecs; // Expires 1 hour from now.
+    note.expiry = Math.floor(Date.now() / 1000) + expSecs; 
     note.badge = 0;
     note.sound = "ping.aiff";
     note.alert = text;
@@ -58,4 +58,4 @@ async function sendNotification(pnToken, text, payload = {}, expSecs = 30){
       });
 }
 
-export default { sendNotification };
+export default { sendNotification }
