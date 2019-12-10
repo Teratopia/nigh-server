@@ -50,12 +50,29 @@ const fetchUserInfoByDeviceId = (deviceId, onSuccess, onFailure) => {
 async function loginUser(username, password, latitude, longitude, deviceId, pnToken, onSuccess, onFailure){
     console.log('log in user 3');
 
+    let user = await User.findOne({username : username});
+    if(!user){
+        onFailure('No username found.');
+    }
+    if(Bcrypt.compareSync(password, user.password)){
+        if(user.pnToken === pnToken){
+            onSuccess(user);
+        } else {
+            await user.updateOne({pnToken : pnToken});
+            var updatedUser = await User.findById(user._id);
+            onSuccess(updatedUser);
+        }
+    } else {
+        onFailure('Password does not match.');
+    }
+    /*
     User.findOne({
         username: username
     }).then(doc => {
         if(Bcrypt.compareSync(password, doc.password)) {
             console.log('log in user success doc = ', doc);
             if(doc.pnToken !== pnToken){
+
                 doc.updateOne({pnToken : pnToken}).then(updatedUser => {
                     onSuccess(updatedUser);
                 });                
@@ -68,6 +85,7 @@ async function loginUser(username, password, latitude, longitude, deviceId, pnTo
     }).catch(err => {
         onFailure(err);
     });
+    */
 }
 
 async function updateUserStatusToActive(userId, statuses, venueId, onSuccess, onFailure) {
