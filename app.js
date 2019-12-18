@@ -13,10 +13,11 @@ import MatchRouter from './router/matchRouter';
 import VenueRouter from './router/venueRouter';
 import MatchPersistence from './persistence/matchPersistence';
 import CompetitionRouter from './router/competitionRouter';
-
+import ImageRouter from './router/imageRouter';
 import notificationHandler from './notifications/notificationHandler';
 
 notificationHandler;
+
 
 const mongoose = require('mongoose');
 const Product = require('./models/product');
@@ -363,6 +364,11 @@ router.post('/getVenueCompetitionHistory', (req, res) => {
   CompetitionRouter.getVenueCompetitionHistory(req, res);
 });
 
+router.post('/getLeaderboardInfo', (req, res) => {
+  console.log('getLeaderboardInfo 1');
+  CompetitionRouter.getLeaderboardInfo(req, res);
+});
+
 router.post('/getMultipleUsersById', (req, res) => {
   console.log('getMultipleUsersById 1');
   UserRouter.getMultipleUsersById(req, res);
@@ -406,6 +412,14 @@ router.post('/getVenueNotificationInfoById', (req, res) => {
 router.post('/deletePromotion', (req, res) => {
   console.log('deletePromotion 1');
   VenueRouter.deletePromotion(req, res);
+});
+
+router.post('/uploadImageAndReturnId', upload.array('photo', 3), (req, res) => {
+  ImageRouter.uploadImageAndReturnId(req.files[0].path, req, res);
+});
+
+router.post('/getImageById', (req, res) => {
+  ImageRouter.getImageById(req, res);
 });
 
 //Nigh.us-east-2.elasticbeanstalk.com

@@ -152,6 +152,25 @@ const getVenueCompetitionHistory = (req, res) => {
     });
 }
 
+const getLeaderboardInfo = (req, res) => {
+    console.log('getLeaderboardInfo successful, req.body = ');
+    var bodyJson = req.body;
+    console.log(bodyJson);
+    competitionPersistence.getLeaderboardInfo(bodyJson.venueId, bodyJson.fromDate, bodyJson.toDate, scoresList => {
+        console.log('# getLeaderboardInfo scoresList = ', scoresList);
+        res.status(200).send({
+        success : 'true',
+        scoresList : scoresList
+        })
+    }, err => {
+        console.log('# err = ', err);
+        res.status(500).send({
+        success : false,
+        message : err
+        })
+    });
+}
+
 export default { 
                 requestCompetition, 
                 checkForCompetition,
@@ -160,5 +179,6 @@ export default {
                 updateChallenge,
                 confirmChallenge,
                 getCompetitionHistory,
-                getVenueCompetitionHistory
+                getVenueCompetitionHistory,
+                getLeaderboardInfo
                 };

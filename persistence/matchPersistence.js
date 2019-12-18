@@ -105,14 +105,22 @@ async function addMessageToMatch(matchId, message, onSuccess, onFailure){
         if(updatedMatch.userOne._id === message.user._id){
                 try{
                     var recipient = await User.findById(updatedMatch.userTwo._id);
-                    await notificationHandler.sendNotification(recipient.pnToken, 'New message from '+updatedMatch.userOne.username+'!', {}, 120);
+                    var payload = {notificationType : 'chatMessage', text : 'New message from '+updatedMatch.userOne.username+'!'};
+                    await notificationHandler.sendNotification(recipient.pnToken, 
+                        'New message from '+updatedMatch.userOne.username+'!', 
+                        payload, 
+                        120);
                 } catch (e){
                     console.log('send notification error = ', e);
                 }
         } else {
                 try{
                     var recipient = await User.findById(updatedMatch.userOne._id);
-                    await notificationHandler.sendNotification(recipient.pnToken, 'New message from '+updatedMatch.userTwo.username+'!', {}, 120);
+                    var payload = {notificationType : 'chatMessage', text : 'New message from '+updatedMatch.userTwo.username+'!'};
+                    await notificationHandler.sendNotification(recipient.pnToken, 
+                        'New message from '+updatedMatch.userTwo.username+'!', 
+                        payload, 
+                        120);
                 } catch (e){
                     console.log('send notification error = ', e);
                 }

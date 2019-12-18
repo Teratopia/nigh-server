@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 import PoolTable from './poolTable';
 import VenuePromotion from './venuePromotion';
+import VenueLeague from './venueLeague';
 
 const venueSchema = mongoose.Schema({
     _id : mongoose.Schema.Types.ObjectId,
@@ -20,6 +21,8 @@ const venueSchema = mongoose.Schema({
     poolTables : [PoolTable.schema],
     venuePromotions : [VenuePromotion.schema],
     adminIds : [String],
+    pushNotificationPromotion : String,
+    activeLeague : VenueLeague.schema,
     houseRules : {}
 });
 

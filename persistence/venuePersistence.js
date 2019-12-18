@@ -5,6 +5,7 @@ const PoolTable = require('../models/poolTable');
 const Image = require('../models/image');
 const FriendRequest = require('../models/friendRequest');
 const VenuePromotion = require('../models/venuePromotion');
+const VenueLeague = require('../models/venueLeague');
 var fs = require('fs');
 const Bcrypt = require("bcryptjs");
 
@@ -67,7 +68,11 @@ const updateVenue = (venue, onSuccess, onFailure) => {
         err ? onFailure(err) : onSuccess(doc);
     });
     */
+    
     Venue.findById(venue._id).then(resVen => {
+        if(venue.activeLeague && !resVen.activeLeague){
+            venue.activeLeague = new VenueLeague(venue.activeLeague);
+        }
         resVen.updateOne(venue).then(res => {
             Venue.findById(venue._id).then(finalResVen => {
             onSuccess(finalResVen);

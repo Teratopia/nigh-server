@@ -1,5 +1,8 @@
+import notificationHandler from '../notifications/notificationHandler';
+
 const mongoose = require('mongoose');
 const User = require('../models/user');
+const Venue = require('../models/venue');
 const Image = require('../models/image');
 const FriendRequest = require('../models/friendRequest');
 var fs = require('fs');
@@ -88,6 +91,63 @@ async function loginUser(username, password, latitude, longitude, deviceId, pnTo
     */
 }
 
+async function notifyUserFriendsOfActiveStatus(userId, venueId, activity){
+    const user = await User.findById(userId);
+    let addLocation = false;
+    let abort = false;
+        user.statuses.forEach(status => {
+            if(status.activityName === activity){
+                if(status.shareMyStatusWithFriends){
+                    if(status.shareMyLocationWithFriends){
+                        addLocation = true;
+                    }
+                } else {
+                    abort = true;
+                }
+            }
+        })
+    if(abort){
+        return;
+    }
+    let message = user.username+' is now active!';
+    if(venueId && addLocation){
+        const venue = await Venue.findById(venueId);
+        message = user.username+' checked into '+venue.properName+'!';
+    }
+    var friendIds = user.friendsIdList;
+    var blockedIds = user.blockedFriendsIdList;
+    var filteredFriendIds = friendIds.filter(function(value){
+        if(blockedIds.includes(value)){
+            return false;
+        }
+        return true;
+    });
+    var queryIdList = filteredFriendIds.forEach(ffId => {
+        ffId = mongoose.Types.ObjectId(ffId);
+    });
+    var friends = await model.find({
+        '_id': { $in: queryIdList },
+        statuses : {
+            $elemMatch: {
+                activityName: activity,
+                friendsBecomeActive: true
+            }
+        },
+        //blockedFriendsIdList : { $nin : [userId] }
+    }, function(err, docs){
+         console.log(docs);
+    });
+    friends.forEach(friend => {
+        if(!friend.blockedFriendsIdList.includes(userId) && friend.pnToken){
+            notificationHandler.sendNotification(
+                friend.pnToken,
+                message,
+                {'notificationType': 'friendStatusChange', 'text' : message}
+            )
+        }
+    })
+}
+
 async function updateUserStatusToActive(userId, statuses, venueId, onSuccess, onFailure) {
     const user = await User.findById(userId);
     const update = {activeVenueId : venueId, statuses : statuses};
@@ -96,6 +156,11 @@ async function updateUserStatusToActive(userId, statuses, venueId, onSuccess, on
     console.log('updateUserStatusToActive updatedUser = ');
     console.log(updatedUser);
     onSuccess(updatedUser);
+    statuses.forEach(status => {
+        if(status.active){
+            notifyUserFriendsOfActiveStatus(userId, venueId, status.activityName);
+        }
+    })
 }
 
 async function updateUserStatuses(userId, statuses, onSuccess, onFailure) {

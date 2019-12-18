@@ -9,7 +9,7 @@ const certPath = path.resolve(__dirname) + '/../constants/AuthKey_6TKNHKXR46.p8'
 const teamId = 'F559B6R2ZF';
 const keyId = '6TKNHKXR46';
 const bundleId = 'org.reactjs.native.example.Nigh2';
-const deviceToken = '6a16d15b6381d9d8a3b1e1e0c7c2459a133f41f9ab996c2dfe69b63e1c1594d6';
+const deviceToken = 'c3fcaaf44153ea3f76b94329a4a5808780c92e62ddd070a020e2f87ba1557d9b';
 
 var options = {
     token: {
@@ -32,7 +32,8 @@ testNote.expiry = Math.floor(Date.now() / 1000) + 3600; // Expires 1 hour from n
 testNote.badge = 3;
 testNote.sound = "ping.aiff";
 testNote.alert = "You have a new message";
-testNote.payload = {'messageFrom': 'John Appleseed'};
+//testNote.payload = {'messageFrom': 'John Appleseed'};
+testNote.payload = {'notificationType': 'chatMessage', 'text' : 'test'};
 testNote.topic = bundleId;
 
 console.log('noteHandler testNote = ', testNote);
