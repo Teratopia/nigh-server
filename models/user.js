@@ -48,6 +48,7 @@ const userSchema = mongoose.Schema({
     profileDescription : String,
     friendsIdList : [String],
     blockedFriendsIdList : [String],
+    venueFavoritesIdList : [String],
     statuses : [Status]
 });
 

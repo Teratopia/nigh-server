@@ -106,6 +106,26 @@ const getVenueById = (req, res) => {
     });
 }
 
+const getVenuesById = (req, res) => {
+    console.log('getVenuesById 1 successful, req.body = ');
+    var bodyJson = req.body;
+    console.log(bodyJson);
+    venuePersistence.getVenuesById(bodyJson.venueIdList, venues => {
+        console.log('# venues = ', venues);
+        res.status(200).send({
+        success : 'true',
+        bodyReceived : req.body,
+        venues : venues
+        })
+    }, err => {
+        console.log('# err = ', err);
+        res.status(500).send({
+        success : false,
+        message : err
+        })
+    });
+}
+
 const getVenueNotificationInfoById = (req, res) => {
     console.log('getVenueNotificationInfoById 1 successful, req.body = ');
     var bodyJson = req.body;
@@ -312,5 +332,6 @@ export default {
                 clearVenuePromotions,
                 getVenuePromotionImage,
                 getVenueNotificationInfoById,
-                deletePromotion
+                deletePromotion,
+                getVenuesById
                 };

@@ -115,6 +115,14 @@ const getVenueById = (venueId, onSuccess, onFailure) => {
     });
 }
 
+const getVenuesById = (venueIdList, onSuccess, onFailure) => {
+    Venue.find({'_id' : { $in : venueIdList}}).then(venues => {
+        onSuccess(venues);
+    }).catch(err => {
+        onFailure(err);
+    });
+}
+
 const getVenueNotificationInfoById = (venueId, statusSettings, friendsList, onSuccess, onFailure) => {
     var friendsAtVenue = [];
     var nonFriendsAtVenue = [];
@@ -467,5 +475,6 @@ export default {    signUpVenue,
                     clearVenuePromotions,
                     getVenuePromotionImage,
                     getVenueNotificationInfoById,
-                    deletePromotion
+                    deletePromotion,
+                    getVenuesById
                 };

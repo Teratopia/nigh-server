@@ -415,6 +415,44 @@ const toggleBlockFriend = (req, res) => {
     });
 }
 
+const addVenueIdToFavorites = (req, res) => {
+    console.log('addVenueIdToFavorites 1');
+    var bodyJson = req.body;
+    console.log(bodyJson);
+    userPersistance.addVenueIdToFavorites(bodyJson.userId, bodyJson.venueId, user => {
+        console.log('# addVenueIdToFavorites user = ', user);
+        res.status(200).send({
+        success : true,
+        user : user
+        })
+    }, err => {
+        console.log('# err = ', err);
+        res.status(500).send({
+        success : false,
+        message : err
+        })
+    });
+}
+
+const removeVenueIdFromFavorites = (req, res) => {
+    console.log('removeVenueIdFromFavorites 1');
+    var bodyJson = req.body;
+    console.log(bodyJson);
+    userPersistance.removeVenueIdFromFavorites(bodyJson.userId, bodyJson.venueId, user => {
+        console.log('# removeVenueIdFromFavorites user = ', user);
+        res.status(200).send({
+        success : true,
+        user : user
+        })
+    }, err => {
+        console.log('# err = ', err);
+        res.status(500).send({
+        success : false,
+        message : err
+        })
+    });
+}
+
 const deleteAllUsers = () => {
     userPersistance.deleteAllUsers();
 }
@@ -439,5 +477,7 @@ export default {    loginUser,
                     getUserFriends,
                     toggleBlockFriend,
                     updateUserStatusToActive,
-                    getMultipleUsersById
+                    getMultipleUsersById,
+                    addVenueIdToFavorites,
+                    removeVenueIdFromFavorites
                 };

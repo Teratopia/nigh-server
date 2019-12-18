@@ -524,6 +524,30 @@ const toggleBlockFriend = (userId, friendToBlockId, onSuccess, onFailure) => {
     })
 }
 
+async function addVenueIdToFavorites(userId, venueId, onSuccess, onFailure){
+    var user = await User.findById(userId);
+        if(user){
+            await user.updateOne({
+                $push : {venueFavoritesIdList : venueId}
+            });
+            var updatedUser = await User.findById(userId);
+            onSuccess(updatedUser);
+        } else {
+            onFailure('no user found');
+        }
+}
+
+async function removeVenueIdFromFavorites(userId, venueId, onSuccess, onFailure){
+
+    var user = await User.update( {_id: userId}, { $pullAll: {venueFavoritesIdList: [venueId] } } );
+    if(user){
+        var updatedUser = await User.findById(userId);
+        onSuccess(updatedUser);
+    } else {
+        onFailure('no user returned');
+    }
+}
+
 //get rid of this...
 const deleteAllUsers = () => {
     User.deleteMany({}, res => {
@@ -580,5 +604,7 @@ export default {    createNewUser,
                     updateUserStatusToActive,
                     toggleBlockFriend,
                     getMultipleUsersById,
-                    logoutUser
+                    logoutUser,
+                    addVenueIdToFavorites,
+                    removeVenueIdFromFavorites
                 };

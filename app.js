@@ -374,6 +374,16 @@ router.post('/getMultipleUsersById', (req, res) => {
   UserRouter.getMultipleUsersById(req, res);
 });
 
+router.post('/addVenueIdToFavorites', (req, res) => {
+  console.log('addVenueIdToFavorites 1');
+  UserRouter.addVenueIdToFavorites(req, res);
+});
+
+router.post('/removeVenueIdFromFavorites', (req, res) => {
+  console.log('removeVenueIdFromFavorites 1');
+  UserRouter.removeVenueIdFromFavorites(req, res);
+});
+
 router.post('/upsertVenuePromotion', upload.array('photo', 3), (req, res) => {
   console.log('upsertVenuePromotion req, ', req);
   //console.log('upsertVenuePromotion res, ', res);
@@ -412,6 +422,11 @@ router.post('/getVenueNotificationInfoById', (req, res) => {
 router.post('/deletePromotion', (req, res) => {
   console.log('deletePromotion 1');
   VenueRouter.deletePromotion(req, res);
+});
+
+router.post('/getVenuesById', (req, res) => {
+  console.log('getVenuesById 1');
+  VenueRouter.getVenuesById(req, res);
 });
 
 router.post('/uploadImageAndReturnId', upload.array('photo', 3), (req, res) => {
