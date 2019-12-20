@@ -65,6 +65,12 @@ io.on('connection', function(socket){
     });
     socket.broadcast.to(room).emit('chat message', msg);
   });
+  socket.on('stats update', function(room) {
+    console.log('stats update, ');
+    if(room){
+      socket.broadcast.to(room).emit('stats update', msg);
+    }
+  });
   socket.on('leaveRoom', function(room) {
     console.log('room left, '+room);
     socket.leave(room);
