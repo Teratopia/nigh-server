@@ -66,19 +66,21 @@ io.on('connection', function(socket){
     });
     socket.broadcast.to(room).emit('chat message', msg);
   });
+  /*
   socket.on('stats update', function(room) {
     console.log('stats update, ');
     if(room){
       socket.broadcast.to(room).emit('stats update', msg);
     }
   });
+  */
 
   //
 
   socket.on('requestCompetition', function(comp) {
     console.log('requestCompetition');
     competitionPersistence.requestCompetition(comp, resComp => {
-      socket.in(room).emit('competition update', resComp);
+      socket.to(room).emit('competition update', resComp);
     }, err => {
       console.log('requestCompetition err = ', err);
     })
@@ -86,7 +88,7 @@ io.on('connection', function(socket){
   socket.on('deleteChallenge', function(id) {
     console.log('deleteChallenge');
     competitionPersistence.deleteChallenge(id, () => {
-      socket.in(room).emit('competition update', null);
+      socket.to(room).emit('competition update', null);
     }, err => {
       console.log('deleteChallenge err = ', err);
     })
@@ -94,7 +96,7 @@ io.on('connection', function(socket){
   socket.on('acceptChallenge', function(id) {
     console.log('acceptChallenge');
     competitionPersistence.acceptChallenge(id, resComp => {
-      socket.in(room).emit('competition update', resComp);
+      socket.to(room).emit('competition update', resComp);
     }, err => {
       console.log('deleteChallenge err = ', err);
     })
@@ -102,7 +104,7 @@ io.on('connection', function(socket){
   socket.on('finishChallenge', function(comp) {
     console.log('finishChallenge');
     competitionPersistence.updateChallenge(comp, resComp => {
-      socket.in(room).emit('competition update', resComp);
+      socket.to(room).emit('competition update', resComp);
     }, err => {
       console.log('finishChallenge err = ', err);
     })
@@ -110,8 +112,8 @@ io.on('connection', function(socket){
   socket.on('confirmChallenge', function(req) {
     console.log('confirmChallenge');
     competitionPersistence.confirmChallenge(req.userId, req.competitionId, resComp => {
-      socket.in(room).emit('competition update', resComp);
-      socket.in(room).emit('update statistics', null);
+      socket.to(room).emit('competition update', resComp);
+      socket.to(room).emit('update statistics', null);
     }, err => {
       console.log('confirmChallenge err = ', err);
     })
