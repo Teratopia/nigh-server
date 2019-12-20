@@ -15,6 +15,7 @@ import MatchPersistence from './persistence/matchPersistence';
 import CompetitionRouter from './router/competitionRouter';
 import ImageRouter from './router/imageRouter';
 import notificationHandler from './notifications/notificationHandler';
+import competitionPersistence from './persistence/competitionPersistence';
 
 notificationHandler;
 
@@ -71,6 +72,52 @@ io.on('connection', function(socket){
       socket.broadcast.to(room).emit('stats update', msg);
     }
   });
+
+  //
+  
+  socket.on('requestCompetition', function(comp) {
+    console.log('requestCompetition');
+    competitionPersistence.requestCompetition(comp, resComp => {
+      socket.broadcast.to(room).emit('competition update', resComp);
+    }, err => {
+      console.log('requestCompetition err = ', err);
+    })
+  });
+  socket.on('deleteChallenge', function(id) {
+    console.log('deleteChallenge');
+    competitionPersistence.deleteChallenge(id, () => {
+      socket.broadcast.to(room).emit('competition update', null);
+    }, err => {
+      console.log('deleteChallenge err = ', err);
+    })
+  });
+  socket.on('acceptChallenge', function(id) {
+    console.log('acceptChallenge');
+    competitionPersistence.acceptChallenge(id, resComp => {
+      socket.broadcast.to(room).emit('competition update', resComp);
+    }, err => {
+      console.log('deleteChallenge err = ', err);
+    })
+  });
+  socket.on('finishChallenge', function(comp) {
+    console.log('finishChallenge');
+    competitionPersistence.updateChallenge(comp, resComp => {
+      socket.broadcast.to(room).emit('competition update', resComp);
+    }, err => {
+      console.log('finishChallenge err = ', err);
+    })
+  });
+  socket.on('confirmChallenge', function(req) {
+    console.log('confirmChallenge');
+    competitionPersistence.confirmChallenge(req.userId, req.competitionId, resComp => {
+      socket.broadcast.to(room).emit('competition update', resComp);
+    }, err => {
+      console.log('confirmChallenge err = ', err);
+    })
+  });
+
+  //
+  
   socket.on('leaveRoom', function(room) {
     console.log('room left, '+room);
     socket.leave(room);
