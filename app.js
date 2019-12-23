@@ -53,6 +53,7 @@ io.on('connection', function(socket){
     console.log('room recieved, '+matchRoom);
     socket.join(matchRoom);
     room = matchRoom;
+    socket.to(room).emit('testRoom', 'TEST');
   });
   socket.on('chat message', function(msg){
     console.log('message: ' + JSON.stringify(msg)+', room = '+room);
@@ -79,8 +80,12 @@ io.on('connection', function(socket){
 
   socket.on('requestCompetition', function(comp) {
     console.log('requestCompetition');
+    console.log('room = ', room);
     competitionPersistence.requestCompetition(comp, resComp => {
+      console.log('request competition callback 1');
+      console.log('request competition callback resComp = ', resComp);
       socket.to(room).emit('competition update', resComp);
+      socket.emit('competition update', resComp);
     }, err => {
       console.log('requestCompetition err = ', err);
     })
@@ -89,6 +94,7 @@ io.on('connection', function(socket){
     console.log('deleteChallenge');
     competitionPersistence.deleteChallenge(id, () => {
       socket.to(room).emit('competition update', null);
+      socket.emit('competition update', null);
     }, err => {
       console.log('deleteChallenge err = ', err);
     })
@@ -97,6 +103,7 @@ io.on('connection', function(socket){
     console.log('acceptChallenge');
     competitionPersistence.acceptChallenge(id, resComp => {
       socket.to(room).emit('competition update', resComp);
+      socket.emit('competition update', resComp);
     }, err => {
       console.log('deleteChallenge err = ', err);
     })
@@ -105,6 +112,7 @@ io.on('connection', function(socket){
     console.log('finishChallenge');
     competitionPersistence.updateChallenge(comp, resComp => {
       socket.to(room).emit('competition update', resComp);
+      socket.emit('competition update', resComp);
     }, err => {
       console.log('finishChallenge err = ', err);
     })
@@ -113,7 +121,9 @@ io.on('connection', function(socket){
     console.log('confirmChallenge');
     competitionPersistence.confirmChallenge(req.userId, req.competitionId, resComp => {
       socket.to(room).emit('competition update', resComp);
+      socket.emit('competition update', resComp);
       socket.to(room).emit('update statistics', null);
+      socket.emit('update statistics', null);
     }, err => {
       console.log('confirmChallenge err = ', err);
     })
@@ -204,6 +214,18 @@ router.post('/testConnect', (req, res, next) => {
   })
 });
 
+router.post('/requestEmailVerification', (req, res) => {
+  UserRouter.requestEmailVerification(req, res);
+});
+
+router.post('/updateUserEmail', (req, res) => {
+  UserRouter.updateUserEmail(req, res);
+});
+
+router.post('/addPnToken', (req, res) => {
+  UserRouter.addPnToken(req, res);
+});
+
 router.put('/updateUserStatuses', (req, res) => {
   UserRouter.updateUserStatuses(req, res);
 });
@@ -223,6 +245,12 @@ router.post('/signUp', (req, res) => {
 router.post('/login', (req, res) => {
   console.log('log in 1');
   UserRouter.loginUser(req, res);
+});
+
+router.post('/requestUserAuthentication', (req, res) => {
+  console.log('requestUserAuthentication 1');
+
+  
 });
 
 router.post('/devId', (req, res) => {

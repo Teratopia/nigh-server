@@ -3,6 +3,7 @@
 import userPersistance from '../persistence/userPersistence';
 //mport foo from '../persistence/userPersistence';
 
+
 const loginUser = (req, res) => {
     console.log('log in 2');
     console.log('login successful, req.body = ');
@@ -16,12 +17,21 @@ const loginUser = (req, res) => {
         bodyReceived : req.body,
         user : doc
         })
-    }, err => {
+    }, (err, errorCode, verificationCode) => {
         console.log('# err = ', err);
-        res.status(500).send({
-        success : false,
-        message : err
-        })
+        if(errorCode && verificationCode){
+            res.status(errorCode).send({
+                success : false,
+                message : err,
+                verificationCode : verificationCode
+            })
+        } else {
+            res.status((errorCode || 500)).send({
+                success : false,
+                message : err
+            })
+        }
+        
     });
 }
 
@@ -46,12 +56,73 @@ const signUpUser = (req, res) => {
     });
 }
 
+const requestEmailVerification = (req, res) => {
+    console.log('requestEmailVerification successful, req.body = ');
+    var bodyJson = req.body;
+    console.log(bodyJson);
+    //username, password, latitude, longitude, onSuccess, onFailure
+    userPersistance.requestEmailVerification(bodyJson.email, code => {
+        console.log('# doc = ', doc);
+        res.status(200).send({
+        success : true,
+        code : code
+        })
+    }, err => {
+        console.log('# err = ', err);
+        res.status(500).send({
+        success : false,
+        message : err
+        })
+    });
+}
+
+const addPnToken = (req, res) => {
+    console.log('addPnToken successful, req.body = ');
+    var bodyJson = req.body;
+    console.log(bodyJson);
+    //username, password, latitude, longitude, onSuccess, onFailure
+    userPersistance.addPnToken(bodyJson.email, bodyJson.pnToken, code => {
+        console.log('# doc = ', doc);
+        res.status(200).send({
+        success : true,
+        code : code
+        })
+    }, err => {
+        console.log('# err = ', err);
+        res.status(500).send({
+        success : false,
+        message : err
+        })
+    });
+}
+
 const updateUserLocation = (req, res) => {
     console.log('updateUserLocation successful, req.body = ');
     var bodyJson = req.body;
     console.log(bodyJson);
     //username, password, latitude, longitude, onSuccess, onFailure
     userPersistance.updateUserLocation(bodyJson.userId, bodyJson.latitude, bodyJson.longitude, doc => {
+        console.log('# doc = ', doc);
+        res.status(200).send({
+        success : true,
+        bodyReceived : req.body,
+        user : doc
+        })
+    }, err => {
+        console.log('# err = ', err);
+        res.status(500).send({
+        success : false,
+        message : err
+        })
+    });
+}
+
+const updateUserEmail = (req, res) => {
+    console.log('updateUserEmail successful, req.body = ');
+    var bodyJson = req.body;
+    console.log(bodyJson);
+    //username, password, latitude, longitude, onSuccess, onFailure
+    userPersistance.updateUserEmail(bodyJson.userId, bodyJson.email, doc => {
         console.log('# doc = ', doc);
         res.status(200).send({
         success : true,
@@ -457,8 +528,11 @@ const deleteAllUsers = () => {
     userPersistance.deleteAllUsers();
 }
 
-export default {    loginUser, 
+export default {    requestEmailVerification,
+                    loginUser, 
                     signUpUser, 
+                    addPnToken,
+                    updateUserEmail,
                     updateUserLocation, 
                     updateUserStatuses, 
                     setAllUserStatusesToPassive, 

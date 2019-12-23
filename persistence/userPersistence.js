@@ -7,6 +7,7 @@ const Image = require('../models/image');
 const FriendRequest = require('../models/friendRequest');
 var fs = require('fs');
 const Bcrypt = require("bcryptjs");
+var nodemailer = require('nodemailer');
 
 const createNewUser = (username, password, latitude, longitude, deviceId, pnToken, onSuccess, onFailure) => {
     User.find({ username: username }).then(docs => {
@@ -29,6 +30,7 @@ const createNewUser = (username, password, latitude, longitude, deviceId, pnToke
                 activeVenueId : null,
                 deviceIds: [deviceId],
                 pnToken : pnToken,
+                recognizedPnTokens : [pnToken],
                 statuses: initializeStatuses()
             });
             user.save().then(doc => {
@@ -59,11 +61,47 @@ async function loginUser(username, password, latitude, longitude, deviceId, pnTo
     }
     if(Bcrypt.compareSync(password, user.password)){
         if(user.pnToken === pnToken){
-            onSuccess(user);
+            await user.updateOne({
+                location: {
+                    type: "Point",
+                    coordinates: [longitude, latitude]
+                },
+                lastLogin: Date.now()
+            });
+            var updatedUser = await User.findById(user._id);
+            onSuccess(updatedUser);
+        } else if(user.recognizedPnTokens.includes(pnToken)){
+            await user.updateOne({
+                pnToken : pnToken,
+                location: {
+                    type: "Point",
+                    coordinates: [longitude, latitude]
+                },
+                lastLogin: Date.now()
+            });
+            var updatedUser = await User.findById(user._id);
+            onSuccess(updatedUser);
         } else {
+            //TO DO: 
+            let message = 'An unrecognized device is attempting to log in.';
+            notificationHandler.sendNotification(
+                user.pnToken, 
+                message, 
+                payload = {'notificationType': 'unrecognizedDevie', 'text' : message}, 
+                expSecs = 30
+            )
+            if(user.email){
+                requestEmailVerification(user.email, code => {
+                    onFailure('Unauthorized device id.', 401, code);
+                }, err => {
+                    console.log('requestEmailVerification error = ', err);
+                })
+            }
+            /*
             await user.updateOne({pnToken : pnToken});
             var updatedUser = await User.findById(user._id);
             onSuccess(updatedUser);
+            */
         }
     } else {
         onFailure('Password does not match.');
@@ -89,6 +127,66 @@ async function loginUser(username, password, latitude, longitude, deviceId, pnTo
         onFailure(err);
     });
     */
+}
+
+const requestEmailVerification = (email, onSuccess, onFailure) => {
+    console.log('requestEmailVerification successful, req.body = ');
+    var code = Math.random().toFixed(6)+'';
+    var resCode = code.substring(2, 8);
+    console.log('code = ', resCode);
+      var transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+          user : 'kennisnigh1@gmail.com',
+          pass : 'jhcuyiaeuuluecye'
+        }
+      });
+
+      var mailOptions = {
+        from: 'Nigh',
+        to: email,
+        subject: 'Your Nigh Authentication Code',
+        html: '<div style="width : 34%; padding : 24px; border-style: solid; border-width: 1px; border-color: #607d8b;">'+
+                '<h4 style="text-align: center;">Your Nigh Email Verification Code</h4>'+
+                '<h2 style="text-align: center;">'+resCode+'</h2>'+
+            '</div>'
+      };
+      
+      transporter.sendMail(mailOptions, function(error, info){
+        if (error) {
+          console.log(error);
+        } else {
+          console.log('Email sent: ' + info.response);
+          onSuccess(resCode);
+        }
+      });
+}
+
+async function updateUserEmail(userId, email, onSuccess, onFailure){
+    User.findById(userId).then(user => {
+        user.email = email;
+        user.save().then(updatedUser => {
+            onSuccess(updatedUser);
+        }).catch(e => {
+            onFailure(e);
+        })
+    })
+}
+
+async function addPnToken(userId, pnToken, onSuccess, onFailure){
+    User.findById(userId).then(user => {
+        user.pnToken = pnToken;
+        user.recognizedPnTokens.push(pnToken);
+        user.save().then(res => {
+            User.findById(userId).then(updatedUser => {
+                onSuccess(updatedUser);
+            }).catch(e => {
+                onFailure(e);
+            })
+        }).catch(e => {
+            onFailure(e);
+        })
+    })
 }
 
 async function notifyUserFriendsOfActiveStatus(userId, venueId, activity){
@@ -585,6 +683,8 @@ const activities = [
 
 export default {    createNewUser, 
                     fetchUserInfoByDeviceId, 
+                    updateUserEmail,
+                    addPnToken,
                     loginUser, 
                     updateUserStatuses, 
                     setAllUserStatusesToPassive, 
@@ -606,5 +706,6 @@ export default {    createNewUser,
                     getMultipleUsersById,
                     logoutUser,
                     addVenueIdToFavorites,
-                    removeVenueIdFromFavorites
+                    removeVenueIdFromFavorites,
+                    requestEmailVerification
                 };

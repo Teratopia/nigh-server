@@ -38,6 +38,7 @@ const userSchema = mongoose.Schema({
     activeVenueId : String,
     deviceIds : [String],
     pnToken : String,
+    recognizedPnTokens : [String],
     gender : String,
     sexuality : String,
     occupation : String,
@@ -49,7 +50,7 @@ const userSchema = mongoose.Schema({
     friendsIdList : [String],
     blockedFriendsIdList : [String],
     venueFavoritesIdList : [String],
-    statuses : [Status]
+    statuses : [Status],
 });
 
 userSchema.index({ location: "2dsphere" });
