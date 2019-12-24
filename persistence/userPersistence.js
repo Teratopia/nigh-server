@@ -155,6 +155,7 @@ const requestEmailVerification = (email, onSuccess, onFailure) => {
       transporter.sendMail(mailOptions, function(error, info){
         if (error) {
           console.log(error);
+          onFailure(error);
         } else {
           console.log('Email sent: ' + info.response);
           onSuccess(resCode);

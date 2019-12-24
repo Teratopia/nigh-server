@@ -62,7 +62,7 @@ const requestEmailVerification = (req, res) => {
     console.log(bodyJson);
     //username, password, latitude, longitude, onSuccess, onFailure
     userPersistance.requestEmailVerification(bodyJson.email, code => {
-        console.log('# doc = ', doc);
+        console.log('# code = ', code);
         res.status(200).send({
         success : true,
         code : code
