@@ -92,7 +92,8 @@ async function loginUser(username, password, latitude, longitude, deviceId, pnTo
             )
             if(user.email){
                 requestEmailVerification(user.email, code => {
-                    onFailure('Unauthorized device id.', 401, code);
+                    onSuccess(user, code);
+                    //onFailure('Unauthorized device id.', 401, code);
                 }, err => {
                     console.log('requestEmailVerification error = ', err);
                 })

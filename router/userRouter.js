@@ -10,13 +10,17 @@ const loginUser = (req, res) => {
     var bodyJson = req.body;
     console.log(bodyJson);
     //username, password, latitude, longitude, onSuccess, onFailure
-    userPersistance.loginUser(bodyJson.username, bodyJson.password, bodyJson.latitude, bodyJson.longitude, bodyJson.deviceId, bodyJson.pnToken, doc => {
+    userPersistance.loginUser(bodyJson.username, bodyJson.password, bodyJson.latitude, bodyJson.longitude, bodyJson.deviceId, bodyJson.pnToken, (doc, verfificationCode) => {
         console.log('# doc = ', doc);
-        res.status(200).send({
-        success : 'true',
-        bodyReceived : req.body,
-        user : doc
-        })
+        result = {
+            success : 'true',
+            bodyReceived : req.body,
+            user : doc
+            };
+        if(verfificationCode){
+            result.verfificationCode = verfificationCode;
+        }
+        res.status(200).send(result)
     }, (err, errorCode, verificationCode) => {
         console.log('# err = ', err);
         if(errorCode && verificationCode){
