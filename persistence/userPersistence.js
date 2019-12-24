@@ -87,10 +87,11 @@ async function loginUser(username, password, latitude, longitude, deviceId, pnTo
             notificationHandler.sendNotification(
                 user.pnToken, 
                 message, 
-                payload = {'notificationType': 'unrecognizedDevie', 'text' : message}, 
-                expSecs = 30
+                {'notificationType': 'unrecognizedDevie', 'text' : message}, 
+                30
             )
             if(user.email){
+                console.log('user has email');
                 requestEmailVerification(user.email, code => {
                     onSuccess(user, code);
                     //onFailure('Unauthorized device id.', 401, code);

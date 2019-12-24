@@ -12,7 +12,7 @@ const loginUser = (req, res) => {
     //username, password, latitude, longitude, onSuccess, onFailure
     userPersistance.loginUser(bodyJson.username, bodyJson.password, bodyJson.latitude, bodyJson.longitude, bodyJson.deviceId, bodyJson.pnToken, (doc, verfificationCode) => {
         console.log('# doc = ', doc);
-        result = {
+        var result = {
             success : 'true',
             bodyReceived : req.body,
             user : doc
