@@ -16,6 +16,7 @@ import CompetitionRouter from './router/competitionRouter';
 import ImageRouter from './router/imageRouter';
 import notificationHandler from './notifications/notificationHandler';
 import competitionPersistence from './persistence/competitionPersistence';
+var nodemailer = require('nodemailer');
 
 notificationHandler;
 
@@ -212,6 +213,45 @@ router.post('/testConnect', (req, res, next) => {
     success : 'true',
     bodyReceived : req.body
   })
+});
+
+router.post('/sendFeedback', (req, res) => {
+  var bodyJson = req.body;
+  var subject = 'Feedback - '+bodyJson.type;
+  if(bodyJson.type === 'ERROR'){
+    subject += ', severity '+bodyJson.severity;
+  }
+  var transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user : 'kennisnigh1@gmail.com',
+      pass : 'jhcuyiaeuuluecye'
+    }
+  });
+
+  var mailOptions = {
+    from: bodyJson.user.username,
+    to: 'kylewoodennis@gmail.com',
+    //to: 'kennisnigh1@gmail.com',
+    subject: subject,
+    text: bodyJson.text
+  };
+  
+  transporter.sendMail(mailOptions, function(error, info){
+    if (error) {
+      console.log(error);
+      res.status(500).send({
+        success : false,
+        message : 'Message failed to send'
+        });
+    } else {
+      console.log('Email sent: ' + info.response);
+      res.status(200).send({
+        success : true,
+        message : 'Message sent'
+        });
+    }
+  });
 });
 
 router.post('/requestEmailVerification', (req, res) => {
