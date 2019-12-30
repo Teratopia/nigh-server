@@ -10,17 +10,18 @@ const loginUser = (req, res) => {
     var bodyJson = req.body;
     console.log(bodyJson);
     //username, password, latitude, longitude, onSuccess, onFailure
-    userPersistance.loginUser(bodyJson.username, bodyJson.password, bodyJson.latitude, bodyJson.longitude, bodyJson.deviceId, bodyJson.pnToken, (doc, verfificationCode) => {
+    userPersistance.loginUser(bodyJson.username, bodyJson.password, bodyJson.latitude, bodyJson.longitude, bodyJson.deviceId, bodyJson.pnToken, (doc, verificationCode, message) => {
         console.log('# doc = ', doc);
         var result = {
             success : 'true',
             bodyReceived : req.body,
-            user : doc
+            user : doc,
+            message : message
             };
-        if(verfificationCode){
-            result.verfificationCode = verfificationCode;
+        if(verificationCode){
+            result.verificationCode = verificationCode;
         }
-        res.status(200).send(result)
+        res.status(200).send(result);
     }, (err, errorCode, verificationCode) => {
         console.log('# err = ', err);
         if(errorCode && verificationCode){
@@ -86,10 +87,46 @@ const addPnToken = (req, res) => {
     console.log(bodyJson);
     //username, password, latitude, longitude, onSuccess, onFailure
     userPersistance.addPnToken(bodyJson.email, bodyJson.pnToken, code => {
-        console.log('# doc = ', doc);
         res.status(200).send({
         success : true,
         code : code
+        })
+    }, err => {
+        console.log('# err = ', err);
+        res.status(500).send({
+        success : false,
+        message : err
+        })
+    });
+}
+
+const passwordResetVerifyEmail = (req, res) => {
+    console.log('passwordResetVerifyEmail successful, req.body = ');
+    var bodyJson = req.body;
+    console.log(bodyJson);
+    //username, password, latitude, longitude, onSuccess, onFailure
+    userPersistance.passwordResetVerifyEmail(bodyJson.username, bodyJson.email, code => {
+        res.status(200).send({
+        success : true,
+        code : code
+        })
+    }, err => {
+        console.log('# err = ', err);
+        res.status(500).send({
+        success : false,
+        message : err
+        })
+    });
+}
+
+const passwordReset = (req, res) => {
+    console.log('passwordReset successful, req.body = ');
+    var bodyJson = req.body;
+    console.log(bodyJson);
+    //username, password, latitude, longitude, onSuccess, onFailure
+    userPersistance.passwordReset(bodyJson.username, bodyJson.email, bodyJson.password, code => {
+        res.status(200).send({
+        success : true
         })
     }, err => {
         console.log('# err = ', err);
@@ -557,5 +594,7 @@ export default {    requestEmailVerification,
                     updateUserStatusToActive,
                     getMultipleUsersById,
                     addVenueIdToFavorites,
-                    removeVenueIdFromFavorites
+                    removeVenueIdFromFavorites,
+                    passwordResetVerifyEmail,
+                    passwordReset
                 };

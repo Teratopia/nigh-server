@@ -56,6 +56,7 @@ async function loginUser(username, password, latitude, longitude, deviceId, pnTo
     console.log('log in user 3');
 
     let user = await User.findOne({username : username});
+    console.log('loginUser user = ', user);
     if(!user){
         onFailure('No username found.');
     }
@@ -84,12 +85,17 @@ async function loginUser(username, password, latitude, longitude, deviceId, pnTo
         } else {
             //TO DO: 
             let message = 'An unrecognized device is attempting to log in.';
-            notificationHandler.sendNotification(
-                user.pnToken, 
-                message, 
-                {'notificationType': 'unrecognizedDevie', 'text' : message}, 
-                30
-            )
+            try{
+                notificationHandler.sendNotification(
+                    user.pnToken, 
+                    message, 
+                    {'notificationType': 'unrecognizedDevie', 'text' : message}, 
+                    30
+                )
+            }catch(e){
+                console.log('notificationHandler.sendNotification error = ', e);
+            }
+            
             if(user.email){
                 console.log('user has email');
                 requestEmailVerification(user.email, code => {
@@ -98,6 +104,9 @@ async function loginUser(username, password, latitude, longitude, deviceId, pnTo
                 }, err => {
                     console.log('requestEmailVerification error = ', err);
                 })
+            } else {
+                onSuccess(user, null, 'No Email');
+                //onFailure('No Email');
             }
             /*
             await user.updateOne({pnToken : pnToken});
@@ -190,6 +199,48 @@ async function addPnToken(userId, pnToken, onSuccess, onFailure){
             onFailure(e);
         })
     })
+}
+
+async function passwordResetVerifyEmail(username, email, onSuccess, onFailure){
+    var regex = new RegExp('^'+email+'$', 'i');
+    User.findOne({username : username, email : { $regex : regex }}).catch(e => {
+        onFailure(e);
+    }).then(user => {
+        console.log('passwordResetVerifyEmail user = ', user);
+        if(user){
+            requestEmailVerification(email, code => {
+                onSuccess(code);
+            }, err => {
+                onFailure(err);
+            });
+        } else {
+            onFailure('No User Found');
+        }
+    }).catch(e => {
+        onFailure(e);
+    })
+}
+
+async function passwordReset(username, email, password, onSuccess, onFailure){
+    var regex = new RegExp('^'+email+'$', 'i');
+    User.findOne({username : username, email : { $regex : regex }}).catch(e => {
+        onFailure(e);
+    }).then(user => {
+        console.log('passwordReset user = ', user);
+        if(user){
+            password = Bcrypt.hashSync(password, 10);
+            user.password = password;
+            user.save().then(res => {
+                onSuccess();
+            }).catch(e => {
+                onFailure(e);
+            });
+        } else {
+            onFailure('No User Found');
+        }
+    }).catch(e => {
+        onFailure(e);
+    });
 }
 
 async function notifyUserFriendsOfActiveStatus(userId, venueId, activity){
@@ -710,5 +761,7 @@ export default {    createNewUser,
                     logoutUser,
                     addVenueIdToFavorites,
                     removeVenueIdFromFavorites,
-                    requestEmailVerification
+                    requestEmailVerification,
+                    passwordResetVerifyEmail,
+                    passwordReset
                 };

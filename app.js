@@ -262,6 +262,14 @@ router.post('/updateUserEmail', (req, res) => {
   UserRouter.updateUserEmail(req, res);
 });
 
+router.post('/passwordResetVerifyEmail', (req, res) => {
+  UserRouter.passwordResetVerifyEmail(req, res);
+});
+
+router.post('/passwordReset', (req, res) => {
+  UserRouter.passwordReset(req, res);
+});
+
 router.post('/addPnToken', (req, res) => {
   UserRouter.addPnToken(req, res);
 });
