@@ -86,7 +86,7 @@ const addPnToken = (req, res) => {
     var bodyJson = req.body;
     console.log(bodyJson);
     //username, password, latitude, longitude, onSuccess, onFailure
-    userPersistance.addPnToken(bodyJson.email, bodyJson.pnToken, code => {
+    userPersistance.addPnToken(bodyJson.userId, bodyJson.pnToken, code => {
         res.status(200).send({
         success : true,
         code : code
